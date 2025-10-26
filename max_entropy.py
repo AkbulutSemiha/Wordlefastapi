@@ -1,17 +1,23 @@
 import math
-import random
-
-import pandas as pd
-
-
+import string
 class MaxEnropyWordleSolve:
-    def __init__(self, file_path):
+    def __init__(self, file_path,language):
         self.file_path = file_path
         self.read_words_from_file()
-        self.letter_dict = {letter: idx for idx, letter in enumerate(
-            ["A", "B", "C", "Ç", "D", "E", "F", "G", "Ğ", "H", "I", "İ", "J", "K", "L", "M", "N", "O", "Ö", "P", "R",
-             "S", "Ş", "T", "U", "Ü", "V", "Y", "Z"])}
+        self.language=language
+        self.set_letters()
         self.reset_possible_word()
+
+    def set_letters(self):
+        if self.language == "tr":
+            self.letter_dict = {letter: idx for idx, letter in enumerate(
+                ["A", "B", "C", "Ç", "D", "E", "F", "G", "Ğ", "H", "I", "İ", "J", "K", "L", "M", "N", "O", "Ö", "P",
+                 "R",
+                 "S", "Ş", "T", "U", "Ü", "V", "Y", "Z"])}
+        elif self.language == "en":
+            self.letter_dict = {letter: idx for idx, letter in enumerate(list(string.ascii_uppercase))}
+        else:
+            print(" GEÇERSİZ DİL SEÇİMİ en/tr SEÇ")
 
     def reset_possible_word(self):
         self.possible_words = self.words
@@ -75,14 +81,14 @@ class MaxEnropyWordleSolve:
         return encode_data
     def prepare_input(self,iteration_count, guess, feedback, target,previos,attempts):
         # Harfleri sayısal değerlere çevir
-        encoded_target = self.encode_data(target) #[self.letter_dict[letter] for letter in target]
-        encoded_guess =  self.encode_data(guess)#[self.letter_dict[letter] for letter in guess]
+        encoded_target = self.encode_data(target)
+        encoded_guess = self.encode_data(guess)
         encoded_previos = self.encode_data(previos)
         return [iteration_count, attempts] + encoded_previos + list(feedback) + encoded_guess + encoded_target
 
 
 def predict_max_entropy(wordleGuesses):
-    solver = MaxEnropyWordleSolve(file_path="dataset/default_words.txt")
+    solver = MaxEnropyWordleSolve(file_path="Words/words_tr.txt",language="tr")
     for guess, feedback in wordleGuesses.guesses:
         solver.filter_possible_words(guess[1], tuple(feedback[1]))
         predict, _ = solver.find_max_entropy_guess()

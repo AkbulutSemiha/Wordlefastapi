@@ -1,12 +1,11 @@
 import csv
 
 from pydantic import BaseModel
-from wordle_predict import predict
+from hybrid_model import predict_hybrid_model
 from max_entropy import predict_max_entropy
 from rulebased import predict_rulebased
 from typing import List
-import json
-import requests
+
 import random
 class WordleGuess(BaseModel):
     guess: str
@@ -16,8 +15,7 @@ class WordleGuesses(BaseModel):
     guesses: List[WordleGuess]
 
 
-def read_words_from_file():
-    file_path = "dataset/default_words.txt"
+def read_words_from_file(file_path):
     try:
         with open(file_path, "r", encoding="utf-8") as file:
             words = [line.strip().upper() for line in file if line.strip()]
@@ -47,13 +45,14 @@ def write_to_csv(file_name, data):
             writer.writerow(row)
 
 if __name__ == "__main__":
-    words = read_words_from_file()
+    words = read_words_from_file(file_path="Words/words_tr.txt")
     max_steps = 7
     simulations = []
 
     for _ in range(1000):  # 1000 farklı simülasyon
         print("Simülasyon step: "+ str(_))
         target_word = random.choice(words)
+        print(target_word)
         ai_g,rl_g,ent_g = [],[],[]
         first_guess= random.choice(words)
         ai_guess =first_guess  # İlk AI tahmini
@@ -70,14 +69,14 @@ if __name__ == "__main__":
             rl_g.append(WordleGuess(guess=rule_guess, feedback=rule_feedback))
             ent_g.append(WordleGuess(guess=entropy_guess, feedback=entropy_feedback))
 
-            ai_guess = predict(wordleGuesses=WordleGuesses(guesses=ai_g))  # AI bir sonraki tahmini
+            ai_guess = predict_hybrid_model(wordleGuesses=WordleGuesses(guesses=ai_g))  # AI bir sonraki tahmini
             rule_guess = predict_rulebased(wordleGuesses=WordleGuesses(guesses=rl_g))  # Kural tabanlı bir sonraki tahmini
             entropy_guess = predict_max_entropy(wordleGuesses=WordleGuesses(guesses=ent_g))  # Entropi tabanlı bir sonraki tahmini
             simulations.append([target_word, ai_guess, rule_guess, entropy_guess, iteration_count])
             iteration_count +=1
 
 
-    write_to_csv("16_Ocakwordle_simulations.csv", simulations)
+    #write_to_csv("16_Ocakwordle_simulations.csv", simulations)
 
 
 

@@ -1,3 +1,4 @@
+
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -6,7 +7,39 @@ import numpy as np
 # CSV verisini okuma
 data = pd.read_csv("16_Ocakwordle_simulations.csv")
 
+# Yöntem isimleri
+methods = ["AI Prediction", "Rule-Based Prediction", "Entropy Prediction"]
 
+# Target Word'e göre gruplama ve eşleşmeme sayılarının hesaplanması
+group_mismatch_counts = {}
+
+for target, group in data.groupby("Target Word"):
+    group_mismatch_counts[target] = {method: (group["Target Word"] != group[method]).sum() for method in methods}
+
+# Sonuçları DataFrame olarak gösterme
+group_mismatch_df = pd.DataFrame.from_dict(group_mismatch_counts, orient="index")
+group_mismatch_df.index.name = "Target Word"
+
+# 6 ve daha büyük olan değerleri sayma
+high_mismatch_counts = (group_mismatch_df >= 6).sum()
+
+# Sonuçları ekrana yazdırma
+print(group_mismatch_df)
+print("\n6 ve daha büyük eşleşmeme sayıları:")
+print(high_mismatch_counts)
+
+
+# 6 ve daha büyük olan eşleşmeme sayılarının bar chart (çubuk grafik) ile gösterimi
+plt.figure(figsize=(8,6))
+high_mismatch_counts.plot(kind='bar', color='darkseagreen', edgecolor='black')
+plt.title("High Mismatch Counts (>= 6) per Target Word")
+plt.xlabel("Target Word")
+plt.ylabel("Count of Methods with >= 6 Mismatches")
+plt.xticks(rotation=45)
+plt.ylim(0, high_mismatch_counts.max() + 10)
+
+plt.tight_layout()
+plt.show()
 # Her yöntemin ortalama başarıya ulaştığı adım sayısı
 def average_steps_per_method(prediction_column):
     # Doğru tahmin edilenler için minimum adım sayısını gruplama
@@ -31,9 +64,9 @@ plt.figure(figsize=(8, 6))
 sns.barplot(x=methods, y=avg_steps, palette='viridis')
 
 # Grafik başlıkları ve etiketleri
-plt.title('Başarılı Tahmin Ortalama Adım Sayısı', fontsize=16)
-plt.xlabel('Yöntemler', fontsize=12)
-plt.ylabel('Ortalama Adım Sayısı', fontsize=12)
+plt.title('Average Number of Steps for Successful Prediction', fontsize=16)
+plt.xlabel('Methods', fontsize=12)
+plt.ylabel('Average Number of Steps', fontsize=12)
 
 # Y eksenini sınırlandırma ve aralık ekleme
 plt.ylim(0, 5)  # Y eksenini 0-5 arası sınırla
@@ -45,6 +78,8 @@ for i, v in enumerate(avg_steps):
 
 # Göster
 plt.show()
+
+
 
 
 # Adım 8: Adım Başına Doğru ve Yanlış Tahmin Oranı
@@ -71,13 +106,17 @@ entropy_accuracy = step_accuracy_rate('Entropy Prediction')
 
 # Görselleştirme
 plt.figure(figsize=(10, 6))
-sns.lineplot(data=ai_accuracy, label="AI Accuracy", marker='o')
-sns.lineplot(data=rule_based_accuracy, label="Rule-Based Accuracy", marker='o')
-sns.lineplot(data=entropy_accuracy, label="Entropy Accuracy", marker='o')
+#sns.lineplot(data=ai_accuracy, label="AI Accuracy", marker='*', markersize=8, linewidth=2)
+#sns.lineplot(data=rule_based_accuracy, label="Rule-Based Accuracy", marker='^', markersize=8, linewidth=2)
+#sns.lineplot(data=entropy_accuracy, label="Entropy Accuracy", marker='o', markersize=8, linewidth=2)
 
-plt.title('Adım Başına Doğru ve Yanlış Tahmin Oranı')
-plt.xlabel('Adım Sayısı')
-plt.ylabel('Başarı Yüzdesi')
+sns.lineplot(data=ai_accuracy, label="AI Accuracy", marker='P', markersize=10, linewidth=2, markeredgewidth=2)
+sns.lineplot(data=rule_based_accuracy, label="Rule-Based Accuracy", marker='D', markersize=10, linewidth=2,  markeredgewidth=2)
+sns.lineplot(data=entropy_accuracy, label="Entropy Accuracy", marker='H', markersize=10, linewidth=2, markeredgewidth=2)
+
+plt.title('Ratio of Correct and Incorrect Predictions per Step')
+plt.xlabel('Number of Steps')
+plt.ylabel('Success Percentage')
 plt.legend()
 plt.grid(True)
 plt.show()
@@ -90,15 +129,18 @@ step_accuracy_matrix = pd.DataFrame({
 })
 plt.figure(figsize=(10, 6))
 sns.heatmap(step_accuracy_matrix.T, annot=True, cmap="Blues", fmt=".2f")
-plt.title('Adım Başına Doğru Tahmin Oranı Heatmap')
-plt.xlabel('Adım Sayısı')
-plt.ylabel('Yöntem')
+plt.title('Heatmap of Correct Prediction Ratio per Step')
+plt.xlabel('Number of Steps')
+plt.ylabel('Method')
 plt.show()
 from wordcloud import WordCloud
 
 # Her tahmin türü için kelime bulutu
 all_predictions = pd.concat([data["AI Prediction"]])
-wordcloud = WordCloud(width=800, height=400).generate(" ".join(all_predictions))
+#wordcloud = WordCloud(width=800, height=400).generate(" ".join(all_predictions))
+wordcloud = WordCloud(width=800, height=400,
+                      background_color='white'  # Arka planı beyaz yapar
+                      ).generate(" ".join(all_predictions))
 
 plt.figure(figsize=(10, 6))
 plt.imshow(wordcloud, interpolation="bilinear")
@@ -107,7 +149,7 @@ plt.show()
 
 # Her tahmin türü için kelime bulutu
 all_predictions = pd.concat([data["Rule-Based Prediction"]])
-wordcloud = WordCloud(width=800, height=400).generate(" ".join(all_predictions))
+wordcloud = WordCloud(width=800, height=400,background_color='white').generate(" ".join(all_predictions))
 
 plt.figure(figsize=(10, 6))
 plt.imshow(wordcloud, interpolation="bilinear")
@@ -116,7 +158,7 @@ plt.show()
 
 # Her tahmin türü için kelime bulutu
 all_predictions = pd.concat([data["Entropy Prediction"]])
-wordcloud = WordCloud(width=800, height=400).generate(" ".join(all_predictions))
+wordcloud = WordCloud(width=800, height=400,background_color='white').generate(" ".join(all_predictions))
 
 plt.figure(figsize=(10, 6))
 plt.imshow(wordcloud, interpolation="bilinear")
@@ -159,9 +201,15 @@ en_best_words = word_steps.sort_values().head(10)
 
 # En kötü performans gösteren kelimeler (ortalama adım sayısına göre)
 en_worst_words = word_steps.sort_values(ascending=False).head(10)
+# Listeleri pandas Series'e dönüştürün
+ai_best_words_series = pd.Series(ai_best_words, name='AI Best Words')
+rb_best_words_series = pd.Series(rb_best_words, name='Rule-Based Best Words')
+en_best_words_series = pd.Series(en_best_words, name='Entropy Best Words')
 
-df = pd.concat([ai_best_words,rb_best_words,en_best_words])
+# Şimdi Series'leri birleştirebilirsiniz
+df = pd.concat([ai_best_words_series, rb_best_words_series, en_best_words_series], axis=1)
 
-
+# Sonuçları gösterin
+print(df)
 
 

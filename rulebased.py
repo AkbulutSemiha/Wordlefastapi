@@ -1,26 +1,31 @@
 import random
-
-import pandas as pd
-
-
+import string
 class RuleBasedWordleSolve:
-    def __init__(self, file_path):
-        self.file_path = file_path
-        self.read_words_from_file()
-        self.letter_dict = {letter: idx for idx, letter in enumerate(
-            ["A", "B", "C", "Ç", "D", "E", "F", "G", "Ğ", "H", "I", "İ", "J", "K", "L", "M", "N", "O", "Ö", "P", "R",
-             "S", "Ş", "T", "U", "Ü", "V", "Y", "Z"])}
+    def __init__(self, file_path,language):
+        self.read_words_from_file(path=file_path)
+        self.set_letters(language)
         self.reset_possible_word()
+
+    def set_letters(self,language):
+        if language == "tr":
+            self.letter_dict = {letter: idx for idx, letter in enumerate(
+                ["A", "B", "C", "Ç", "D", "E", "F", "G", "Ğ", "H", "I", "İ", "J", "K", "L", "M", "N", "O", "Ö", "P",
+                 "R",
+                 "S", "Ş", "T", "U", "Ü", "V", "Y", "Z"])}
+        elif language == "en":
+            self.letter_dict = {letter: idx for idx, letter in enumerate(list(string.ascii_uppercase))}
+        else:
+            print(" GEÇERSİZ DİL SEÇİMİ en/tr SEÇ")
 
     def reset_possible_word(self):
         self.possible_words = self.words
 
-    def read_words_from_file(self):
+    def read_words_from_file(self,path):
         try:
-            with open(self.file_path, "r", encoding="utf-8") as file:
+            with open(path, "r", encoding="utf-8") as file:
                 self.words = [line.strip().upper() for line in file if line.strip()]
         except FileNotFoundError:
-            print(f"Hata: {self.file_path} dosyası bulunamadı.")
+            print(f"Hata: {path} dosyası bulunamadı.")
             self.words = []
 
     @staticmethod
@@ -52,15 +57,14 @@ class RuleBasedWordleSolve:
         encode_data = [self.letter_dict[letter] for letter in data]
         return encode_data
     def prepare_input(self,iteration_count, guess, feedback, target,previos,attempts):
-        # Harfleri sayısal değerlere çevir
-        encoded_target = self.encode_data(target) #[self.letter_dict[letter] for letter in target]
-        encoded_guess =  self.encode_data(guess)#[self.letter_dict[letter] for letter in guess]
+        encoded_target = self.encode_data(target)
+        encoded_guess =  self.encode_data(guess)
         encoded_previos = self.encode_data(previos)
         return [iteration_count, attempts] + encoded_previos + list(feedback) + encoded_guess + encoded_target
 
 
 def predict_rulebased(wordleGuesses):
-    solver = RuleBasedWordleSolve(file_path="dataset/default_words.txt")
+    solver = RuleBasedWordleSolve(file_path="Words/words_tr.txt",language="tr")
     for guess, feedback in wordleGuesses.guesses:
         solver.filter_possible_words(guess[1], tuple(feedback[1]))
         predict = solver.find_next_guess()

@@ -1,17 +1,26 @@
 import random
-
+import string
 
 class HumanBehaviour:
-    def __init__(self, file_path):
+    def __init__(self, file_path,lng):
         self.file_path = file_path
+        self.language=lng
         self.read_words_from_file()
-        self.letter_dict = {letter: idx for idx, letter in enumerate(
-            ["A", "B", "C", "Ç", "D", "E", "F", "G", "Ğ", "H", "I", "İ", "J", "K", "L", "M", "N", "O", "Ö", "P", "R",
-             "S", "Ş", "T", "U", "Ü", "V", "Y", "Z"])}
+        self.set_letters()
 
+        
     def reset_possible_word(self):
         self.possible_words = self.words
-
+    def set_letters(self):
+        if self.language == "tr":
+            self.letter_dict = {letter: idx for idx, letter in enumerate(
+                ["A", "B", "C", "Ç", "D", "E", "F", "G", "Ğ", "H", "I", "İ", "J", "K", "L", "M", "N", "O", "Ö", "P", "R",
+                "S", "Ş", "T", "U", "Ü", "V", "Y", "Z"])} 
+        elif self.language =="en":
+            self.letter_dict = {letter: idx for idx, letter in enumerate(list(string.ascii_uppercase))}
+        else:
+            print(" GEÇERSİZ DİL SEÇİMİ en/tr SEÇ")
+                                                        
     def read_words_from_file(self):
         try:
             with open(self.file_path, "r", encoding="utf-8") as file:
@@ -60,7 +69,6 @@ class HumanBehaviour:
         attempts = 0
         print("Wordle çözüm başlıyor...\n")
         self.reset_possible_word()
-        # best_guess="TARİK" # Max entropiye sahip kelime olduğu için her seferinde ilk tahmin o seçilir.
         dataset_list = []
         while True:
             previous = guess
@@ -68,8 +76,7 @@ class HumanBehaviour:
             self.filter_possible_words(previous, feedback)
             guess = self.find_next_guess()
 
-            print(
-                f"gameid: {iteration_count} attempt_index:{attempts} Previous:{previous} feedback:{feedback} guess: {guess} Target: {target_word} ")
+            print(f"gameid: {iteration_count} attempt_index:{attempts} Previous:{previous} feedback:{feedback} guess: {guess} Target: {target_word} ")
             # Hedef kelime bulunduysa dur
             if guess == target_word or attempts == 6:
                 dataset_list.append(
