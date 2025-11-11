@@ -99,14 +99,12 @@ def step_accuracy_rate(method_column):
 
     return step_accuracy
 
-ai_accuracy = step_accuracy_rate('AI Prediction')
 hybrid_accuracy = step_accuracy_rate("Hybrid Prediction")
 rule_based_accuracy = step_accuracy_rate('Rule-Based Prediction')
 entropy_accuracy = step_accuracy_rate('Entropy Prediction')
 
 # Görselleştirme
 plt.figure(figsize=(10, 6))
-sns.lineplot(data=ai_accuracy, label="AI Accuracy", marker='P', markersize=10, linewidth=2, markeredgewidth=2)
 sns.lineplot(data=hybrid_accuracy, label="Hybrid Accuracy", marker='P', markersize=10, linewidth=2, markeredgewidth=2)
 sns.lineplot(data=rule_based_accuracy, label="Rule-Based Accuracy", marker='D', markersize=10, linewidth=2,  markeredgewidth=2)
 sns.lineplot(data=entropy_accuracy, label="Entropy Accuracy", marker='H', markersize=10, linewidth=2, markeredgewidth=2)

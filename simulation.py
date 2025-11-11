@@ -61,7 +61,7 @@ def submit_feedback(current_guess, target_word):
 def write_to_csv(file_name, data):
     with open(file_name, mode='w', newline='',encoding="utf-8") as file:
         writer = csv.writer(file)
-        writer.writerow(["Target Word", "AI Prediction","Hybrid Prediction", "Rule-Based Prediction", "Entropy Prediction", "Steps"])
+        writer.writerow(["Target Word", "Hybrid Prediction", "Rule-Based Prediction", "Entropy Prediction","hybrid_duration","rule_duration","entropy_duration", "Steps"])
         for row in data:
             writer.writerow(row)
 
@@ -85,7 +85,7 @@ def predict_rulebased(solver, wordleGuesses):
     print("Rule tahmin: " + predict)
     return predict
 
-
+import time
 if __name__ == "__main__":
     SEED = 42
     random.seed(SEED)
@@ -98,8 +98,8 @@ if __name__ == "__main__":
 
     max_steps = 6
     simulations = []
-
-    for i in range(1000):  # 1000 farklı simülasyon
+    duration=[]
+    for i in range(20):  # 1000 farklı simülasyon
         print("Simülasyon step: "+ str(i))
         target_word = freq_words[i]
         print(target_word)
@@ -118,21 +118,36 @@ if __name__ == "__main__":
         entropy_solver.reset_possible_word()
         simulations.append([target_word, ai_guess, hbrid_guess, rule_guess, entropy_guess, iteration_count])
         while iteration_count < max_steps:
+            # ---- Hybrid AI tahmini ----
+            start_time = time.time()
             ai_feedback = submit_feedback(hbrid_guess, target_word)
             ai_g.append(WordleGuess(guess=hbrid_guess, feedback=ai_feedback))
-            ai_guess,hbrid_guess = predict_hybrid_model(solver=hybrid_solver,wordleGuesses=WordleGuesses(guesses=ai_g))  # AI bir sonraki tahmini
+            ai_guess, hbrid_guess = predict_hybrid_model(
+                solver=hybrid_solver,
+                wordleGuesses=WordleGuesses(guesses=ai_g)
+            )
+            hybrid_duration = time.time() - start_time  # geçen süre saniye cinsinden
 
+            # ---- Rule-Based tahmini ----
+            start_time = time.time()
             rule_feedback = submit_feedback(rule_guess, target_word)
             rl_g.append(WordleGuess(guess=rule_guess, feedback=rule_feedback))
-            rule_guess = predict_rulebased(solver=rule_solver,wordleGuesses=WordleGuesses(guesses=rl_g))  # Kural tabanlı bir sonraki tahmini
+            rule_guess = predict_rulebased(solver=rule_solver, wordleGuesses=WordleGuesses(guesses=rl_g))
+            rule_duration = time.time() - start_time
 
+            # ---- Entropy tahmini ----
+            start_time = time.time()
             entropy_feedback = submit_feedback(entropy_guess, target_word)
             ent_g.append(WordleGuess(guess=entropy_guess, feedback=entropy_feedback))
-            entropy_guess = predict_max_entropy(solver=entropy_solver,wordleGuesses=WordleGuesses(guesses=ent_g))  # Entropi tabanlı bir sonraki tahmini
-
-            simulations.append([target_word, ai_guess,hbrid_guess, rule_guess, entropy_guess, iteration_count])
+            entropy_guess = predict_max_entropy(
+                solver=entropy_solver,
+                wordleGuesses=WordleGuesses(guesses=ent_g)
+            )
+            entropy_duration = time.time() - start_time
+            duration.append([hybrid_duration,rule_duration,entropy_duration,iteration_count])
+            simulations.append([target_word,hbrid_guess, rule_guess, entropy_guess, hybrid_duration,rule_duration,entropy_duration,iteration_count])
             iteration_count +=1
-    write_to_csv("Cosine1000.csv", simulations)
+    write_to_csv("Euclidean1000.csv", simulations)
 
 
 

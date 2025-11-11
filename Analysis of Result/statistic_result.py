@@ -384,12 +384,13 @@ pivot_first_step.to_csv(os.path.join(OUTDIR, "pivot_first_step_per_game.csv"))
 
 print("Analysis complete. Outputs saved to folder:", OUTDIR)
 print("Key files: summary_game_level.csv, effect_sizes.csv, pairwise_mcnemar.csv, posthoc_nemenyi.csv, results_discussion.txt")"""
+import math
 
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 from collections import defaultdict
-from scipy.stats import kruskal, wilcoxon, spearmanr
+from scipy.stats import kruskal,norm
 import scikit_posthocs as sp
 
 # ===========================================
@@ -453,6 +454,33 @@ summary = pd.DataFrame({"Accuracy": accuracy, "Average Step": avg_step})
 summary.to_csv("game_level_summary.csv")
 print("\n--- Game-level Summary ---\n", summary)
 
+pivot_success = eval_df.pivot(index="Target Word", columns="Method", values="Success")
+pivot_first_step = eval_df.pivot(index="Target Word", columns="Method", values="First_Correct_Step")
+
+# ------------------------------
+# 1) Accuracy (game-level) + 95% CI
+# ------------------------------
+def proportion_confint_mean(p, n, alpha=0.05):
+    # normal approx CI for proportion
+    z = norm.ppf(1 - alpha/2)
+    se = math.sqrt((p*(1-p))/n) if n > 0 else 0
+    return max(0, p - z*se), min(1, p + z*se)
+
+summary_rows = []
+for m in methods:
+    successes = pivot_success[m]
+    n = len(successes)
+    p = successes.mean()
+    ci_low, ci_high = proportion_confint_mean(p, n)
+    summary_rows.append({
+        "Method": m,
+        "Accuracy": p,
+        "CI_low": ci_low,
+        "CI_high": ci_high,
+        "N_games": n
+    })
+summary_df = pd.DataFrame(summary_rows).set_index("Method").sort_values("Accuracy", ascending=False)
+summary_df.to_csv("CI_ac.csv")
 # ===========================================
 # 🔹 4. Step Bazlı Başarı Oranı
 # ===========================================
