@@ -1,0 +1,16 @@
+﻿WORD,METHOD,COUNT,Frequency
+VASIF,Rule-Based Prediction,8,0.0013
+EKSEN,Rule-Based Prediction,7,0.0012
+HAKLI,Rule-Based Prediction,7,0.0012
+YAZIN,Rule-Based Prediction,7,0.0012
+YEĞEN,Rule-Based Prediction,7,0.0012
+KALAK,Hybrid Prediction_Euclidean,39,0.0065
+KELEK,Hybrid Prediction_Euclidean,32,0.0053
+KARAR,Hybrid Prediction_Euclidean,20,0.0033
+KARMA,Hybrid Prediction_Euclidean,16,0.0027
+KARGA,Hybrid Prediction_Euclidean,16,0.0027
+TARİK,Entropy Prediction,44,0.0073
+KERİM,Entropy Prediction,40,0.0067
+TARAK,Entropy Prediction,40,0.0067
+SERİK,Entropy Prediction,24,0.004
+MELİK,Entropy Prediction,22,0.0037

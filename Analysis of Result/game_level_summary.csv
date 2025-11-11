@@ -1,0 +1,4 @@
+Method,Accuracy,Average Step
+Entropy Prediction,0.989,3.1253791708796763
+Hybrid Prediction_Euclidean,0.952,3.341386554621849
+Rule-Based Prediction,0.923,3.533044420368364

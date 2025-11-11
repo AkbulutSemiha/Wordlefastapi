@@ -298,8 +298,8 @@ class OurHybridModel:
             predictions = torch.argmax(logits, dim=-1)  # (1, seq_len, 5)
             step_preds = predictions[0, -1].tolist()  # sadece son adım
             model_predict = self.decode_model_output(step_preds)
-            closest_word = self.find_closest_word_cosine(step_preds, self.possible_words)
-            #closest_word = self.get_word_distance(step_preds,self.possible_words)
+            #closest_word = self.find_closest_word_cosine(step_preds, self.possible_words)
+            closest_word = self.get_word_distance(step_preds,self.possible_words)
         print("LSTM tahmini:", model_predict)
         print("En yakın kelime:", closest_word)
         return model_predict, closest_word

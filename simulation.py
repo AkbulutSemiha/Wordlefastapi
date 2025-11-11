@@ -101,7 +101,7 @@ if __name__ == "__main__":
 
     for i in range(1000):  # 1000 farklı simülasyon
         print("Simülasyon step: "+ str(i))
-        target_word = freq_words[i]#random.choice(words)
+        target_word = freq_words[i]
         print(target_word)
         ai_g,rl_g,ent_g = [],[],[]
         first_guess= random.choice(all_words)
@@ -126,10 +126,9 @@ if __name__ == "__main__":
             rl_g.append(WordleGuess(guess=rule_guess, feedback=rule_feedback))
             rule_guess = predict_rulebased(solver=rule_solver,wordleGuesses=WordleGuesses(guesses=rl_g))  # Kural tabanlı bir sonraki tahmini
 
-            """entropy_feedback = submit_feedback(entropy_guess, target_word)
+            entropy_feedback = submit_feedback(entropy_guess, target_word)
             ent_g.append(WordleGuess(guess=entropy_guess, feedback=entropy_feedback))
             entropy_guess = predict_max_entropy(solver=entropy_solver,wordleGuesses=WordleGuesses(guesses=ent_g))  # Entropi tabanlı bir sonraki tahmini
-            """
 
             simulations.append([target_word, ai_guess,hbrid_guess, rule_guess, entropy_guess, iteration_count])
             iteration_count +=1
