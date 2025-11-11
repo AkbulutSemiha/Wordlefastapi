@@ -1,10 +1,16 @@
 import pandas as pd
 import random
 from Rule_Human import HumanBehaviour
+import os
 
+def save_csv_safely(df, path):
+    # Dosya var mı kontrol et
+    file_exists = os.path.isfile(path)
+
+    # Header sadece dosya yoksa eklenecek
+    df.to_csv(path, mode='a', index=False, header=not file_exists)
 def generate_dataset(language="tr",file_path="../Words/words_tr.txt", output_csv="turkishgamelog1000000.csv"):
     dataset_list = []
-    seen_words = set()
     iteration_count = 0
     human_solver = HumanBehaviour(file_path, language)
 
@@ -12,9 +18,6 @@ def generate_dataset(language="tr",file_path="../Words/words_tr.txt", output_csv
         target_word = random.choice(human_solver.words)
         first_guess = random.choice(human_solver.words)
 
-        if (target_word, first_guess) in seen_words:
-            continue
-        seen_words.add((target_word, first_guess))
 
         if iteration_count <= 1000000:
             dataset_list.extend(
@@ -33,7 +36,7 @@ def generate_dataset(language="tr",file_path="../Words/words_tr.txt", output_csv
                         't1', 't2', 't3', 't4', 't5'
                     ]
                 )
-                df.to_csv(output_csv, index=False, mode='a', encoding='utf-8')
+                save_csv_safely(df, output_csv)
                 print(f"{iteration_count} iterasyonda sonuçlar CSV'ye yazıldı.")
                 dataset_list = []
         else:

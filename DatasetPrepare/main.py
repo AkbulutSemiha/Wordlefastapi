@@ -34,13 +34,14 @@ Notes
 - The randomness is not fixed (no seed) to ensure natural variation.
 - Output CSV contains word, feedback, and guess information for each simulated game.
 """
+import pandas as pd
 
 from generator import generate_dataset
 
 def main():
     generate_dataset(language="tr",
                      file_path="../Words/words_tr.txt",
-                     output_csv="turkishgamelog1000000.csv")
+                     output_csv="turkish1000000.csv")
 
 if __name__ == "__main__":
     main()

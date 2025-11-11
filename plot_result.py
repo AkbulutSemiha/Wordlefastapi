@@ -5,10 +5,10 @@ import seaborn as sns
 import numpy as np
 
 # CSV verisini okuma
-data = pd.read_csv("16_Ocakwordle_simulations.csv")
+data = pd.read_csv("merged_result.csv")
 
 # Yöntem isimleri
-methods = ["AI Prediction", "Rule-Based Prediction", "Entropy Prediction"]
+methods = ["AI Prediction_Cosine","Hybrid Prediction_Cosine","Rule-Based Prediction","AI Prediction_Euclidean","Hybrid Prediction_Euclidean","Entropy Prediction"]
 
 # Target Word'e göre gruplama ve eşleşmeme sayılarının hesaplanması
 group_mismatch_counts = {}
@@ -30,7 +30,7 @@ print(high_mismatch_counts)
 
 
 # 6 ve daha büyük olan eşleşmeme sayılarının bar chart (çubuk grafik) ile gösterimi
-plt.figure(figsize=(8,6))
+plt.figure(figsize=(12,8))
 high_mismatch_counts.plot(kind='bar', color='darkseagreen', edgecolor='black')
 plt.title("High Mismatch Counts (>= 6) per Target Word")
 plt.xlabel("Target Word")
@@ -49,6 +49,7 @@ def average_steps_per_method(prediction_column):
     return steps_per_word.mean()
 
 ai_avg_steps = average_steps_per_method("AI Prediction")
+hybrid_avg_steps = average_steps_per_method("Hybrid Prediction")
 rule_based_avg_steps = average_steps_per_method("Rule-Based Prediction")
 entropy_avg_steps = average_steps_per_method("Entropy Prediction")
 
@@ -56,8 +57,8 @@ print(f"AI : {ai_avg_steps:.2f}")
 print(f"Rule-Based : {rule_based_avg_steps:.2f}")
 print(f"Entropy: {entropy_avg_steps:.2f}")
 # Yöntemler ve ortalama adım sayıları
-methods = ['AI Method', 'Rule-Based Method', 'Entropy Method']
-avg_steps = [ai_avg_steps, rule_based_avg_steps, entropy_avg_steps]
+methods = ["AI Prediction","Hybrıd Prediction", "Rule-Based Prediction", "Entropy Prediction"]
+avg_steps = [ai_avg_steps, hybrid_avg_steps,rule_based_avg_steps, entropy_avg_steps]
 
 # Çubuk grafik
 plt.figure(figsize=(8, 6))
@@ -80,8 +81,6 @@ for i, v in enumerate(avg_steps):
 plt.show()
 
 
-
-
 # Adım 8: Adım Başına Doğru ve Yanlış Tahmin Oranı
 def step_accuracy_rate(method_column):
     first_correct_steps = (
@@ -101,16 +100,14 @@ def step_accuracy_rate(method_column):
     return step_accuracy
 
 ai_accuracy = step_accuracy_rate('AI Prediction')
+hybrid_accuracy = step_accuracy_rate("Hybrid Prediction")
 rule_based_accuracy = step_accuracy_rate('Rule-Based Prediction')
 entropy_accuracy = step_accuracy_rate('Entropy Prediction')
 
 # Görselleştirme
 plt.figure(figsize=(10, 6))
-#sns.lineplot(data=ai_accuracy, label="AI Accuracy", marker='*', markersize=8, linewidth=2)
-#sns.lineplot(data=rule_based_accuracy, label="Rule-Based Accuracy", marker='^', markersize=8, linewidth=2)
-#sns.lineplot(data=entropy_accuracy, label="Entropy Accuracy", marker='o', markersize=8, linewidth=2)
-
 sns.lineplot(data=ai_accuracy, label="AI Accuracy", marker='P', markersize=10, linewidth=2, markeredgewidth=2)
+sns.lineplot(data=hybrid_accuracy, label="Hybrid Accuracy", marker='P', markersize=10, linewidth=2, markeredgewidth=2)
 sns.lineplot(data=rule_based_accuracy, label="Rule-Based Accuracy", marker='D', markersize=10, linewidth=2,  markeredgewidth=2)
 sns.lineplot(data=entropy_accuracy, label="Entropy Accuracy", marker='H', markersize=10, linewidth=2, markeredgewidth=2)
 
@@ -124,6 +121,7 @@ plt.show()
 # Heatmap için başarı oranları
 step_accuracy_matrix = pd.DataFrame({
     'AI': ai_accuracy,
+    "Hybrid": hybrid_accuracy,
     'Rule-Based': rule_based_accuracy,
     'Entropy': entropy_accuracy
 })
@@ -136,8 +134,7 @@ plt.show()
 from wordcloud import WordCloud
 
 # Her tahmin türü için kelime bulutu
-all_predictions = pd.concat([data["AI Prediction"]])
-#wordcloud = WordCloud(width=800, height=400).generate(" ".join(all_predictions))
+all_predictions = pd.concat([data["Hybrid Prediction"]])
 wordcloud = WordCloud(width=800, height=400,
                       background_color='white'  # Arka planı beyaz yapar
                       ).generate(" ".join(all_predictions))

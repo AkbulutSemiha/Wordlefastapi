@@ -1,9 +1,7 @@
 import json
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-from hybrid_model import predict_hybrid_model
-from max_entropy import predict_max_entropy
-from rulebased import predict_rulebased
+from simulation import predict_rulebased,predict_max_entropy,predict_hybrid_model
 import uvicorn
 from typing import List
 

@@ -1,5 +1,7 @@
 import random
 import string
+from collections import Counter
+
 
 class HumanBehaviour:
     def __init__(self, file_path,lng):
@@ -31,16 +33,24 @@ class HumanBehaviour:
 
     @staticmethod
     def generate_feedback(target, guess):
-        feedback = []
-        for t, g in zip(target, guess):
+        feedback = [0] * len(target)
+        unmatched = []
+        for i, (t, g) in enumerate(zip(target, guess)):
             if t == g:
-                feedback.append(2)  # Doğru harf, doğru pozisyon
-            elif g in target:
-                feedback.append(1)  # Doğru harf, yanlış pozisyon
+                feedback[i] = 2  # green
             else:
-                feedback.append(0)  # Yanlış harf
-        return tuple(feedback)
+                unmatched.append(t)
+        counts = Counter(unmatched)
 
+        for i, (t, g) in enumerate(zip(target, guess)):
+            if feedback[i] == 0:  # not green
+                if counts.get(g, 0) > 0:
+                    feedback[i] = 1  # yellow
+                    counts[g] -= 1
+                else:
+                    feedback[i] = 0  # gray
+
+        return tuple(feedback)
     def filter_possible_words(self, guess, feedback):
         """Feedback'e göre kelime havuzunu daralt."""
         self.possible_words = [

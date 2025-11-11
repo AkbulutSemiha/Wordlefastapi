@@ -1,5 +1,8 @@
 import math
 import string
+from collections import Counter
+
+
 class MaxEnropyWordleSolve:
     def __init__(self, file_path,language):
         self.file_path = file_path
@@ -32,14 +35,23 @@ class MaxEnropyWordleSolve:
 
     @staticmethod
     def generate_feedback(target, guess):
-        feedback = []
-        for t, g in zip(target, guess):
+        feedback = [0] * len(target)
+        unmatched = []
+        for i, (t, g) in enumerate(zip(target, guess)):
             if t == g:
-                feedback.append(2)  # Doğru harf, doğru pozisyon
-            elif g in target:
-                feedback.append(1)  # Doğru harf, yanlış pozisyon
+                feedback[i] = 2  # green
             else:
-                feedback.append(0)  # Yanlış harf
+                unmatched.append(t)
+        counts = Counter(unmatched)
+
+        for i, (t, g) in enumerate(zip(target, guess)):
+            if feedback[i] == 0:  # not green
+                if counts.get(g, 0) > 0:
+                    feedback[i] = 1  # yellow
+                    counts[g] -= 1
+                else:
+                    feedback[i] = 0  # gray
+
         return tuple(feedback)
 
     def filter_possible_words(self, guess, feedback):
@@ -87,10 +99,3 @@ class MaxEnropyWordleSolve:
         return [iteration_count, attempts] + encoded_previos + list(feedback) + encoded_guess + encoded_target
 
 
-def predict_max_entropy(wordleGuesses):
-    solver = MaxEnropyWordleSolve(file_path="Words/words_tr.txt",language="tr")
-    for guess, feedback in wordleGuesses.guesses:
-        solver.filter_possible_words(guess[1], tuple(feedback[1]))
-        predict, _ = solver.find_max_entropy_guess()
-    print("Entropy tahmin: " +predict)
-    return predict
