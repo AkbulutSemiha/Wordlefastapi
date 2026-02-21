@@ -1,0 +1,3 @@
+Strategy,Accuracy,Avg Steps,Avg Time (s)
+HybridLSTMSolver,0.9,4.8,0.053157639503479
+RuleBasedSolver,0.9,4.6,0.022319579124450685

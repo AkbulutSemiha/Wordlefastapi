@@ -1,12 +1,19 @@
-import json
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-from simulation import predict_rulebased,predict_max_entropy,predict_hybrid_model
+from typing import List, Tuple
 import uvicorn
-from typing import List
 
+from src.infra.word_repository import WordRepository
+from src.solvers.rule_based_solver import RuleBasedSolver
+from src.solvers.entropy_solver import EntropySolver
+from src.solvers.hybrid_lstm_solver import HybridLSTMSolver
 
-app = FastAPI()
+app = FastAPI(title="Wordle Academic Solver API")
+
+# Global dependencies (Singletons for efficiency)
+repo = WordRepository(data_dir="Words")
+ALL_WORDS = repo.get_words(language="tr")
+MODEL_PATH = "src/models/tr_LSTMmodel_100epoch.pth"
 
 class WordleGuess(BaseModel):
     guess: str
@@ -14,44 +21,39 @@ class WordleGuess(BaseModel):
 
 class WordleGuesses(BaseModel):
     guesses: List[WordleGuess]
+
+def prepare_history(data: WordleGuesses) -> List[Tuple[str, Tuple[int, ...]]]:
+    return [(g.guess, tuple(g.feedback)) for g in data.guesses]
+
 @app.post("/postfeedbacklstm/")
 async def postfeedbacklstm(data: WordleGuesses):
     try:
-        # AI Model tahmini yapılıyor
-        prediction = predict_hybrid_model(wordleGuesses=data)  # Burada 'predict' fonksiyonunuz AI modelini çalıştırır
+        solver = HybridLSTMSolver(words=ALL_WORDS, model_path=MODEL_PATH)
+        history = prepare_history(data)
+        prediction = solver.predict(history)
         return {"prediction": prediction}
-
-    except json.JSONDecodeError:
-        raise HTTPException(status_code=400, detail="Invalid JSON format")
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Prediction error: {str(e)}")
-
+        raise HTTPException(status_code=500, detail=f"Hybrid Prediction error: {str(e)}")
 
 @app.post("/postfeedbackmaxentropy/")
 async def postfeedbackmaxentropy(data: WordleGuesses):
     try:
-        # AI Model tahmini yapılıyor
-        prediction = predict_max_entropy(wordleGuesses=data)  # Burada 'predict' fonksiyonunuz AI modelini çalıştırır
+        solver = EntropySolver(words=ALL_WORDS)
+        history = prepare_history(data)
+        prediction = solver.predict(history)
         return {"prediction": prediction}
-
-    except json.JSONDecodeError:
-        raise HTTPException(status_code=400, detail="Invalid JSON format")
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Prediction error: {str(e)}")
-
+        raise HTTPException(status_code=500, detail=f"Entropy Prediction error: {str(e)}")
 
 @app.post("/postfeedbackrulebased/")
 async def postfeedbackrulebased(data: WordleGuesses):
     try:
-        # AI Model tahmini yapılıyor
-        prediction = predict_rulebased(wordleGuesses=data)  # Burada 'predict' fonksiyonunuz AI modelini çalıştırır
+        solver = RuleBasedSolver(words=ALL_WORDS)
+        history = prepare_history(data)
+        prediction = solver.predict(history)
         return {"prediction": prediction}
-
-    except json.JSONDecodeError:
-        raise HTTPException(status_code=400, detail="Invalid JSON format")
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Prediction error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Rule-based Prediction error: {str(e)}")
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
-

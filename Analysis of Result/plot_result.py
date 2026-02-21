@@ -19,7 +19,11 @@ for target, group in data.groupby("Target Word"):
 # Sonuçları DataFrame olarak gösterme
 group_mismatch_df = pd.DataFrame.from_dict(group_mismatch_counts, orient="index")
 group_mismatch_df.index.name = "Target Word"
-
+words_ge_6 = group_mismatch_df[(group_mismatch_df >= 6).any(axis=1)].index.tolist()
+entropy_bad_words = group_mismatch_df[group_mismatch_df["Entropy Prediction"] >= 6].index.tolist()
+rule_bad_words = group_mismatch_df[group_mismatch_df["Rule-Based Prediction"] >= 6].index.tolist()
+hybrid_bad_words = group_mismatch_df[group_mismatch_df["Hybrid Prediction_Euclidean"] >= 6].index.tolist()
+hardest_words = group_mismatch_df[(group_mismatch_df >= 6).all(axis=1)].index.tolist()
 # 6 ve daha büyük olan değerleri sayma
 high_mismatch_counts = (group_mismatch_df >= 6).sum()
 
